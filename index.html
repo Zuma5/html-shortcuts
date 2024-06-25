@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Tool</title>
+<link rel="icon" type="image/png" href="img/edit3.png">
+<style>
+
+  body {
+    background-color: #f2ebd5;
+    font-family: Arial, sans-serif;
+    color: #2f3e46;
+  }
+  #textArea {
+    width: 75%;
+    height: 400px;
+    display: block;
+    margin: 0 auto 15px;
+    border: 2px solid #1f2e2d;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #fff;
+    color: #1f2e2d;
+    resize: none;
+  }
+  #tagMenu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start;
+    width: 75%;
+    gap: 10px;
+    margin: 20px auto 20px;
+  }
+  #presetMenu {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 90px;
+    left: 20px;
+    gap: 10px;
+  }
+
+  #tagMenu button {
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #d04e44;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #presetMenu button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #118292;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  #tagMenu button:hover {
+    background-color: #4a5562;
+  }
+  #tagMenu button:active {
+    background-color: #2e343b;
+  }
+  
+  #presetMenu button:hover {
+    background-color: #598183;
+  }
+  #presetMenu button:active {
+    background-color: #2a3a41;
+  }
+</style>
+</head>
+<body>
+
+<div id="tagMenu">
+  <button onclick="wrapText('p')">&lt;p&gt;</button>
+  <button onclick="wrapText('ul')">&lt;ul&gt;</button>
+  <button onclick="wrapText('ol')">&lt;ol&gt;</button>
+  <button onclick="wrapText('li')">&lt;li&gt;</button>
+  <button onclick="wrapText('b')">&lt;b&gt;</button>
+  <button onclick="wrapText('strong')">&lt;strong&gt;</button>
+  <button onclick="wrapText('a')">&lt;a&gt;</button>
+  <button onclick="wrapText('span')">&lt;span&gt;</button>
+  <button onclick="wrapText('br')">&lt;br&gt;</button>
+  <button onclick="wrapText('nbsp')">&lt;nbsp&gt;</button>
+</div>
+
+<div id="presetMenu">
+  <button onclick="wrapText('profile_bonuses_sport')">a.bonuses sport</button>
+  <button onclick="wrapText('profile_bonuses_freespins')">a.bonuses freespins</button>
+  <button onclick="wrapText('profile_bonuses_casino')">a.bonuses casino</button>
+  <button onclick="wrapText('profile_personal_info')">a.personal info</button>
+  <button onclick="wrapText('note_line')">p.note line</button>
+  <button onclick="wrapText('money_bold')">money - bold</button>
+  <button onclick="wrapText('money_text')">money</button>
+  <button onclick="wrapText('promocode')">promocode</button>
+</div>
+
+<textarea id="textArea" placeholder="Введите текст здесь..." spellcheck="false"></textarea>
+
+<script>
+  const textArea = document.getElementById('textArea');
+  const undoStack = [];
+  const redoStack = [];
+  let isManualInput = false;
+
+  textArea.addEventListener('dblclick', function (event) {
+    setTimeout(() => {
+      const text = textArea.value;
+      let start = textArea.selectionStart;
+      let end = textArea.selectionEnd;
+
+      // Trim leading whitespace
+      while (start < end && /\s/.test(text[start])) {
+        start++;
+      }
+
+      // Trim trailing whitespace
+      while (end > start && /\s/.test(text[end - 1])) {
+        end--;
+      }
+
+      textArea.setSelectionRange(start, end);
+    }, 0);
+  });
+
+  textArea.addEventListener('input', () => {
+    if (!isManualInput) {
+      saveState();
+    }
+  });
+
+  function wrapText(tag) {
+    console.log('Wrapping text with tag:', tag);
+    saveState(true); // Принудительно сохраняем состояние перед изменением
+
+    let start = textArea.selectionStart;
+    let end = textArea.selectionEnd;
+    const selectedText = textArea.value.substring(start, end);
+    let wrappedText = `<${tag}>${selectedText}</${tag}>`;
+
+    if (tag === 'a') {
+      wrappedText = `<a target="_blank" href="#">${selectedText}</a>`;
+    } else if (tag === 'br') {
+      wrappedText = `<br>`;
+    } else if (tag === 'nbsp') {
+      wrappedText = `&nbsp;`;
+    } else if (tag === 'promocode') {
+      wrappedText = `<b style="color: #FFC700" translate="no">${selectedText}</b>`;
+    } else if (tag === 'profile_bonuses_sport') {
+      wrappedText = `<a target="_blank" href="/profile/bonuses/sport">${selectedText}</a>`;
+    } else if (tag === 'profile_bonuses_freespins') {
+      wrappedText = `<a target="_blank" href="/profile/bonuses/freespins">${selectedText}</a>`;
+    } else if (tag === 'profile_bonuses_casino') {
+      wrappedText = `<a target="_blank" href="/profile/bonuses/casino">${selectedText}</a>`;
+    } else if (tag === 'profile_personal_info') {
+      wrappedText = `<a target="_blank" href="/profile/personal-info">${selectedText}</a>`;
+    } else if (tag === 'note_line') {
+      wrappedText = `<p class="note-line">${selectedText}</p>`;
+    } else if (tag === 'money_bold') {
+      wrappedText = `<span style="white-space: nowrap;"><b>${selectedText}</b></span>`;
+    } else if (tag === 'money_text') {
+      wrappedText = `<span style="white-space: nowrap;"><b>${selectedText}</b></span>`;
+    } else if (tag === 'ul' || tag === 'ol') {
+      wrappedText = `\n<${tag}>\n${selectedText}\n</${tag}>\n`;
+    }
+
+    console.log('Current value before wrap:', textArea.value);
+    console.log('Selected text:', selectedText);
+    console.log('Wrapped text:', wrappedText);
+
+    isManualInput = true;
+    document.execCommand('insertText', false, wrappedText);
+    isManualInput = false;
+
+    console.log('New value after wrap:', textArea.value);
+
+    saveState(true); // Принудительно сохраняем состояние после изменения
+  }
+
+  function saveState(force = false) {
+    const currentValue = textArea.value;
+    if (force || undoStack.length === 0 || undoStack[undoStack.length - 1] !== currentValue) {
+      console.log('Saving state:', currentValue);
+      undoStack.push(currentValue);
+      if (undoStack.length > 100) undoStack.shift(); // Ограничение размера стека отмены до 100
+      redoStack.length = 0; // Очистить стек повторов при новом действии
+    } else {
+      console.log('State not saved, as it is identical to the last state.');
+    }
+  }
+
+  document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.key === 'z') {
+      console.log('Ctrl + Z pressed');
+      undo();
+      event.preventDefault(); // Предотвращаем выполнение действия по умолчанию
+    } else if (event.ctrlKey && event.key === 'y') {
+      console.log('Ctrl + Y pressed');
+      redo();
+      event.preventDefault(); // Предотвращаем выполнение действия по умолчанию
+    }
+  });
+
+  function undo() {
+    if (undoStack.length > 1) {
+      console.log('Undoing...');
+      redoStack.push(undoStack.pop());
+      const previousState = undoStack[undoStack.length - 1];
+      isManualInput = true;
+      textArea.value = previousState;
+      isManualInput = false;
+      console.log('Current value after undo:', textArea.value);
+    }
+  }
+
+  function redo() {
+    if (redoStack.length > 0) {
+      console.log('Redoing...');
+      const nextState = redoStack.pop();
+      undoStack.push(nextState);
+      isManualInput = true;
+      textArea.value = nextState;
+      isManualInput = false;
+      console.log('Current value after redo:', textArea.value);
+    }
+  }
+</script>
+
+</body>
+</html>
