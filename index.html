@@ -135,6 +135,17 @@
     }
   });
 
+  textArea.addEventListener('keydown', function(event) {
+  if (event.key === 'Tab') {
+    event.preventDefault();
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    textArea.setRangeText('    ', start, start, 'end');
+    textArea.setSelectionRange(start + 4, start + 4);
+  }
+});
+
+
   function wrapText(tag) {
     console.log('Wrapping text with tag:', tag);
     saveState(true); // Принудительно сохраняем состояние перед изменением
