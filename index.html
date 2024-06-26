@@ -136,19 +136,29 @@
   });
 
   textArea.addEventListener('keydown', function(event) {
-  if (event.key === 'Tab') {
-    event.preventDefault();
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      indentSelectedText();
+    }
+  });
+
+  function indentSelectedText() {
     const start = textArea.selectionStart;
     const end = textArea.selectionEnd;
-    textArea.setRangeText('    ', start, start, 'end');
-    textArea.setSelectionRange(start + 4, start + 4);
-  }
-});
+    const selectedText = textArea.value.substring(start, end);
+    const indentedText = selectedText.replace(/^/gm, '    ');
+    isManualInput = true;
+    textArea.setRangeText(indentedText, start, end, 'end');
+    isManualInput = false;
 
+    // Re-select the indented content
+    textArea.setSelectionRange(start, start + indentedText.length);
+    saveState(true); // Save the state after indenting
+  }
 
   function wrapText(tag) {
     console.log('Wrapping text with tag:', tag);
-    saveState(true); // Принудительно сохраняем состояние перед изменением
+    saveState(true); // Save the state before modification
 
     let start = textArea.selectionStart;
     let end = textArea.selectionEnd;
@@ -189,18 +199,27 @@
     document.execCommand('insertText', false, wrappedText);
     isManualInput = false;
 
+    // Re-select the wrapped content
+    textArea.setSelectionRange(start, start + wrappedText.length);
+
     console.log('New value after wrap:', textArea.value);
 
-    saveState(true); // Принудительно сохраняем состояние после изменения
+    saveState(true); // Save the state after modification
   }
 
   function saveState(force = false) {
     const currentValue = textArea.value;
-    if (force || undoStack.length === 0 || undoStack[undoStack.length - 1] !== currentValue) {
+    const currentSelectionStart = textArea.selectionStart;
+    const currentSelectionEnd = textArea.selectionEnd;
+    if (force || undoStack.length === 0 || undoStack[undoStack.length - 1].value !== currentValue) {
       console.log('Saving state:', currentValue);
-      undoStack.push(currentValue);
-      if (undoStack.length > 100) undoStack.shift(); // Ограничение размера стека отмены до 100
-      redoStack.length = 0; // Очистить стек повторов при новом действии
+      undoStack.push({
+        value: currentValue,
+        selectionStart: currentSelectionStart,
+        selectionEnd: currentSelectionEnd
+      });
+      if (undoStack.length > 100) undoStack.shift(); // Limit the undo stack size to 100
+      redoStack.length = 0; // Clear the redo stack on new input
     } else {
       console.log('State not saved, as it is identical to the last state.');
     }
@@ -210,11 +229,11 @@
     if (event.ctrlKey && event.key === 'z') {
       console.log('Ctrl + Z pressed');
       undo();
-      event.preventDefault(); // Предотвращаем выполнение действия по умолчанию
+      event.preventDefault(); // Prevent the default action
     } else if (event.ctrlKey && event.key === 'y') {
       console.log('Ctrl + Y pressed');
       redo();
-      event.preventDefault(); // Предотвращаем выполнение действия по умолчанию
+      event.preventDefault(); // Prevent the default action
     }
   });
 
@@ -224,7 +243,8 @@
       redoStack.push(undoStack.pop());
       const previousState = undoStack[undoStack.length - 1];
       isManualInput = true;
-      textArea.value = previousState;
+      textArea.value = previousState.value;
+      textArea.setSelectionRange(previousState.selectionStart, previousState.selectionEnd);
       isManualInput = false;
       console.log('Current value after undo:', textArea.value);
     }
@@ -236,12 +256,14 @@
       const nextState = redoStack.pop();
       undoStack.push(nextState);
       isManualInput = true;
-      textArea.value = nextState;
+      textArea.value = nextState.value;
+      textArea.setSelectionRange(nextState.selectionStart, nextState.selectionEnd);
       isManualInput = false;
       console.log('Current value after redo:', textArea.value);
     }
   }
 </script>
+
 
 </body>
 </html>
