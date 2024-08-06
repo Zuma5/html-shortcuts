@@ -189,7 +189,7 @@
     } else if (tag === 'money_bold') {
       wrappedText = `<span style="white-space: nowrap;"><b>${selectedText}</b></span>`;
     } else if (tag === 'money_text') {
-      wrappedText = `<span style="white-space: nowrap;"><b>${selectedText}</b></span>`;
+      wrappedText = `<span style="white-space: nowrap;">${selectedText}</span>`;
     } else if (tag === 'ul' || tag === 'ol') {
       wrappedText = `\n<${tag}>\n${selectedText}\n</${tag}>\n`;
     }
