@@ -20,8 +20,10 @@
     padding: 10px;
     background-color: #fff;
     color: #1f2e2d;
+    caret-color: red;
     resize: both;
   }
+  
   #tagMenu {
     display: flex;
     flex-wrap: wrap;
@@ -98,6 +100,7 @@
   <button onclick="wrapText('profile_bonuses_casino')">a.bonuses casino</button>
   <button onclick="wrapText('profile_personal_info')">a.personal info</button>
   <button onclick="wrapText('note_line')">p.note line</button>
+  <button onclick="wrapText('champ_ul')">ul.champ</button>
   <button onclick="wrapText('money_bold')">money - bold</button>
   <button onclick="wrapText('money_text')">money</button>
   <button onclick="wrapText('promocode')">promocode</button>
@@ -186,12 +189,14 @@
       wrappedText = `<a target="_blank" href="/profile/personal-info">${selectedText}</a>`;
     } else if (tag === 'note_line') {
       wrappedText = `<p class="note-line">${selectedText}</p>`;
+    } else if (tag === 'champ_ul') {
+      wrappedText = `<ul class="ui-championship-rules__points">\n${selectedText}\n</ul>`;
     } else if (tag === 'money_bold') {
       wrappedText = `<span style="white-space: nowrap;"><b>${selectedText}</b></span>`;
     } else if (tag === 'money_text') {
       wrappedText = `<span style="white-space: nowrap;">${selectedText}</span>`;
     } else if (tag === 'ul' || tag === 'ol') {
-      wrappedText = `\n<${tag}>\n${selectedText}\n</${tag}>\n`;
+      wrappedText = `<${tag}>\n${selectedText}\n</${tag}>`;
     }
 
     console.log('Current value before wrap:', textArea.value);
@@ -266,7 +271,5 @@
     }
   }
 </script>
-
-
 </body>
 </html>
