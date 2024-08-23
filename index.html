@@ -196,7 +196,7 @@
     } else if (tag === 'money_text') {
       wrappedText = `<span style="white-space: nowrap;">${selectedText}</span>`;
     } else if (tag === 'ul' || tag === 'ol') {
-      wrappedText = `<${tag}>\n${selectedText}\n</${tag}>`;
+      wrappedText = `<${tag}>\n${selectedText}\n</${tag}>\n`;
     }
 
     console.log('Current value before wrap:', textArea.value);
