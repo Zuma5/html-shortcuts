@@ -52,6 +52,11 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
+
+  #tagMenu .gray_butn {
+    background-color: #4f5160;
+  }
+
   #presetMenu button {
     padding: 10px;
     border: none;
@@ -90,8 +95,9 @@
   <button onclick="wrapText('span')">&lt;span&gt;</button>
   <button onclick="wrapText('br')">&lt;br&gt;</button>
   <button onclick="wrapText('nbsp')">&lt;nbsp&gt;</button>
+  <button class="gray_butn" onclick="wrapText('comment')">!comment</button>
+  <button class="gray_butn" onclick="wrapText('square_brackets')">[...]</button>
 </div>
-
 
 <div class="flex-display">
 <div id="presetMenu">
@@ -177,6 +183,10 @@
       wrappedText = `<br>`;
     } else if (tag === 'nbsp') {
       wrappedText = `&nbsp;`;
+    } else if (tag === 'comment') {
+      wrappedText = `<!-- ${selectedText} -->`;
+    } else if (tag === 'square_brackets') {
+      wrappedText = `[${selectedText}]`;
     } else if (tag === 'promocode') {
       wrappedText = `<b style="color: #FFC700" translate="no">${selectedText}</b>`;
     } else if (tag === 'profile_bonuses_sport') {
