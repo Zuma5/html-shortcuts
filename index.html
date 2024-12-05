@@ -43,6 +43,10 @@
     gap: 10px;
   }
 
+  #tagMenu .multy {
+    background-color: indigo;
+  }
+
   #tagMenu button {
     padding: 5px;
     border: none;
@@ -86,9 +90,11 @@
 
 <div id="tagMenu">
   <button onclick="wrapText('p')">&lt;p&gt;</button>
+  <button class="multy" onclick="wrapText('p_multiple')">&lt;p&gt;*</button>
   <button onclick="wrapText('ul')">&lt;ul&gt;</button>
   <button onclick="wrapText('ol')">&lt;ol&gt;</button>
   <button onclick="wrapText('li')">&lt;li&gt;</button>
+  <button class="multy" onclick="wrapText('li_multiple')">&lt;li&gt;*</button>
   <button onclick="wrapText('b')">&lt;b&gt;</button>
   <button onclick="wrapText('strong')">&lt;strong&gt;</button>
   <button onclick="wrapText('a')">&lt;a&gt;</button>
@@ -202,11 +208,19 @@
     } else if (tag === 'champ_ul') {
       wrappedText = `<ul class="ui-championship-rules__points">\n${selectedText}\n</ul>`;
     } else if (tag === 'money_bold') {
-      wrappedText = `<span style="white-space: nowrap;"><b>${selectedText}</b></span>`;
+      wrappedText = `<b style="white-space: nowrap;">${selectedText}</b>`;
     } else if (tag === 'money_text') {
       wrappedText = `<span style="white-space: nowrap;">${selectedText}</span>`;
     } else if (tag === 'ul' || tag === 'ol') {
       wrappedText = `<${tag}>\n${selectedText}\n</${tag}>\n`;
+    } else if (tag === 'li_multiple' || tag === 'p_multiple') {
+      const lines = selectedText.split('\n');
+      const tagName = tag === 'li_multiple' ? 'li' : 'p';
+      wrappedText = lines
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => `<${tagName}>${line}</${tagName}>`)
+        .join('\n');
     }
 
     console.log('Current value before wrap:', textArea.value);
@@ -280,6 +294,46 @@
       console.log('Current value after redo:', textArea.value);
     }
   }
+
+  // Add Ctrl + Click feature to select content inside tags with nested tag awareness
+  textArea.addEventListener('click', function(event) {
+    if (event.ctrlKey) {
+      const cursorPosition = textArea.selectionStart;
+      const text = textArea.value;
+      const tagStack = [];
+      let currentPosition = 0;
+
+      // Traverse through the text to find nested tags
+      while (currentPosition < text.length) {
+        const openTagStart = text.indexOf('<', currentPosition);
+        const closeTagStart = text.indexOf('</', currentPosition);
+        const nextTagStart = openTagStart !== -1 && (closeTagStart === -1 || openTagStart < closeTagStart) ? openTagStart : closeTagStart;
+
+        if (nextTagStart === -1) break;
+
+        const nextTagEnd = text.indexOf('>', nextTagStart);
+        if (nextTagEnd === -1) break;
+
+        const tagContent = text.substring(nextTagStart, nextTagEnd + 1);
+        currentPosition = nextTagEnd + 1;
+
+        if (tagContent.startsWith('</')) {
+          // Closing tag
+          if (tagStack.length > 0 && tagStack[tagStack.length - 1].tagName === tagContent.slice(2, -1)) {
+            const openTag = tagStack.pop();
+            if (openTag.start < cursorPosition && cursorPosition < currentPosition) {
+              textArea.setSelectionRange(openTag.end + 1, nextTagStart);
+              break;
+            }
+          }
+        } else {
+          // Opening tag
+          const tagName = tagContent.slice(1, tagContent.indexOf(' ') > 0 ? tagContent.indexOf(' ') : tagContent.indexOf('>'));
+          tagStack.push({ tagName, start: nextTagStart, end: nextTagEnd });
+        }
+      }
+    }
+  });
 </script>
 </body>
 </html>
