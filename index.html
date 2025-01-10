@@ -103,6 +103,9 @@
   <button onclick="wrapText('nbsp')">&lt;nbsp&gt;</button>
   <button class="gray_butn" onclick="wrapText('comment')">!comment</button>
   <button class="gray_butn" onclick="wrapText('square_brackets')">[...]</button>
+  <button onclick="wrapText('details')">&lt;det&gt;</button>
+  <button onclick="wrapText('summary')">&lt;summ&gt;</button>
+
 </div>
 
 <div class="flex-display">
@@ -212,6 +215,8 @@
     } else if (tag === 'money_text') {
       wrappedText = `<span style="white-space: nowrap;">${selectedText}</span>`;
     } else if (tag === 'ul' || tag === 'ol') {
+      wrappedText = `<${tag}>\n${selectedText}\n</${tag}>\n`;
+    } else if (tag === 'details') {
       wrappedText = `<${tag}>\n${selectedText}\n</${tag}>\n`;
     } else if (tag === 'li_multiple' || tag === 'p_multiple') {
       const lines = selectedText.split('\n');
